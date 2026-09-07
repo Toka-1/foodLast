@@ -22,15 +22,18 @@ app.use("/food", foodRouter);
 app.use("/order", orderRouter);
 app.use("/user", userRouter);
 
-mongoose
-  .connect(
-    "mongodb+srv://irmuungantulga2_db_user:UansysmMozwk6Nyd@cluster0.2x10ogk.mongodb.net/",
-  )
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-console.log("hehe");
-
-app.listen(port, () => {
-  console.log(`server is running on http://localhost:${port}`);
-});
+async function startServer() {
+  await mongoose
+    .connect(
+      "mongodb+srv://irmuungantulga2_db_user:UansysmMozwk6Nyd@cluster0.2x10ogk.mongodb.net/",
+    )
+    .catch((err) => console.error("MongoDB connection error:", err));
+  console.log("Connected ");
+  if (!process.env.VERCEL) {
+    const port = 8000;
+    app.listen(port, () => {
+      console.log(`server is running on http://localhost:${port}`);
+    });
+  }
+}
+startServer();
