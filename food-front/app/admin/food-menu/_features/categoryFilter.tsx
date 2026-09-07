@@ -12,6 +12,8 @@ export type CategoryType = {
   foodCount: number;
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export const CategoryFilter = () => {
   const [active, setActive] = useState("All Dishes");
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -20,14 +22,14 @@ export const CategoryFilter = () => {
   const [totalFoods, setTotalFoods] = useState(0);
 
   const getCategory = async () => {
-    const res = await fetch("http://localhost:8000/category");
+    const res = await fetch(`${API_URL}/category`);
     const data = await res.json();
     setCategories(data.categories);
     setTotalFoods(data.totalFoods);
   };
 
   const createCategory = async () => {
-    const res = await fetch("http://localhost:8000/category", {
+    const res = await fetch(`${API_URL}/category`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ categoryName: categoryName, count: 0 }),
@@ -38,7 +40,7 @@ export const CategoryFilter = () => {
     setIsDialogOpen(false);
   };
   const deleteCategory = async (categoryId: string) => {
-    const res = await fetch("http://localhost:8000/category", {
+    const res = await fetch(`${API_URL}/category`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: categoryId, count: 0 }),

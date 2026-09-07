@@ -28,7 +28,7 @@ interface OrderItem {
   createdAt?: string;
 }
 
-const API_BASE_URL = "http://localhost:8000/order";
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/order`;
 
 const getCurrentUserId = (): string | null => {
   try {

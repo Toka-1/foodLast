@@ -8,12 +8,14 @@ import {
 } from "./_features/categoryFilter";
 import { DishSection } from "./_features/dishSection";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function FoodMenuPage() {
   const [categories, setCategories] = useState<CategoryType[]>([]);
 
   const getCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8000/category");
+      const response = await fetch(`${API_URL}/category`);
 
       if (!response.ok) {
         throw new Error("Category татахад алдаа гарлаа");
