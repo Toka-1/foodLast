@@ -11,6 +11,7 @@ import { userRouter } from "./routes/user.js";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
+const port = 8000;
 const app = express();
 
 app.use(express.json());
@@ -21,14 +22,13 @@ app.use("/food", foodRouter);
 app.use("/order", orderRouter);
 app.use("/user", userRouter);
 
-await mongoose.connect(process.env.MONGODB_URI);
-console.log("Connected ");
+mongoose
+  .connect(
+    "mongodb+srv://irmuungantulga2_db_user:UansysmMozwk6Nyd@cluster0.2x10ogk.mongodb.net/",
+  )
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-if (!process.env.VERCEL) {
-  const port = 8000;
-  app.listen(port, () => {
-    console.log(`server is running on http://localhost:${port}`);
-  });
-}
-
-export default app;
+app.listen(port, () => {
+  console.log(`server is running on http://localhost:${port}`);
+});

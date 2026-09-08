@@ -62,7 +62,7 @@ export default function LoginPage() {
       );
 
       toast.success("Амжилттай нэвтэрлээ");
-      router.push("/");
+      router.push(data.user?.role === "ADMIN" ? "/admin" : "/");
     } catch {
       setErrorMessage("Сервэртэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.");
       toast.error("Нэвтрэхэд алдаа гарлаа");

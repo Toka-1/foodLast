@@ -21,8 +21,6 @@ type CategoryItem = {
   categoryName: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function Home() {
   const [foods, setFoods] = useState<CardItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
@@ -31,7 +29,7 @@ export default function Home() {
   const fetchData = async () => {
     try {
       // 1. Категори татах
-      const catRes = await fetch(`${API_URL}/category`);
+      const catRes = await fetch("http://localhost:8000/category");
       const catData = await catRes.json();
       const loadedCategories = Array.isArray(catData) ? catData : catData.categories || [];
       
@@ -40,7 +38,7 @@ export default function Home() {
       setCategories(loadedCategories);
 
     
-      const foodRes = await fetch(`${API_URL}/food`);
+      const foodRes = await fetch("http://localhost:8000/food");
       const foodData = await foodRes.json();
       const loadedFoods = Array.isArray(foodData) ? foodData : foodData.foods || [];
 

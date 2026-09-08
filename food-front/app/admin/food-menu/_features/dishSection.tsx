@@ -5,8 +5,6 @@ import { DishCard, FoodType } from "./dishCard";
 import { AddDishCard } from "./AddDishCard";
 import { CategoryType } from "./categoryFilter";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export const DishSection = ({
   category,
 }: {
@@ -17,7 +15,7 @@ export const DishSection = ({
   const getFoods = async () => {
     try {
       const response = await fetch(
-        `${API_URL}/category/${category._id}`,
+        `http://localhost:8000/category/${category._id}`,
       );
 
       if (!response.ok) {

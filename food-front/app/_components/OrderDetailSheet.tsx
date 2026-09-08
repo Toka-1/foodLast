@@ -1,69 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {
-  X,
-  Plus,
-  Minus,
-  Edit2,
-  Check,
-  Clock,
-  MapPin,
-  Soup,
-} from "lucide-react";
+import { X, Plus, Minus, Edit2, Check } from "lucide-react";
 import { useCart } from "./context/CartContext";
 
 interface OrderItem {
   _id?: string;
   orderId?: string;
-  foodOrderItems?: {
-    food?: { foodName?: string; name?: string; image?: string };
-    quantity?: number;
-  }[];
+  foodOrderItems?: any[];
   items?: any[];
   totalPrice?: number;
   status?: string;
   address?: string;
-  createdAt?: string;
 }
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/order`;
-
-const getCurrentUserId = (): string | null => {
-  try {
-    const raw = localStorage.getItem("user");
-    if (raw) {
-      const user = JSON.parse(raw) as { _id?: string; id?: string };
-      const fromUser = user._id || user.id;
-      if (fromUser && String(fromUser).trim()) {
-        return String(fromUser).trim();
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    const payloadPart = token.split(".")[1];
-    if (!payloadPart) return null;
-    const payload = JSON.parse(atob(payloadPart)) as {
-      userId?: string;
-      _id?: string;
-      id?: string;
-    };
-    const fromToken = payload.userId || payload._id || payload.id;
-    if (fromToken && String(fromToken).trim()) {
-      return String(fromToken).trim();
-    }
-  } catch {
-    // ignore
-  }
-
-  return null;
-};
+const API_BASE_URL = "http://localhost:8000/order";
 
 export const OrderDetailSheet = ({
   isOpen,
@@ -72,7 +23,6 @@ export const OrderDetailSheet = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"cart" | "order">("cart");
   const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
   const [orders, setOrders] = useState<OrderItem[]>([]);
@@ -119,25 +69,13 @@ export const OrderDetailSheet = ({
 
     setIsLoading(true);
 
-    const userId = getCurrentUserId();
-    const token = localStorage.getItem("token");
-
-    if (!userId || !token) {
-      setIsLoading(false);
-      alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
-      onClose();
-      router.push("/login");
-      return;
-    }
-
     const payload = {
-      user: userId,
+      user: null,
       totalPrice: total,
       foodOrderItems: cartItems.map((item: any) => ({
         food: item.id || item._id,
         quantity: item.quantity,
       })),
-      address: address.trim(),
       status: "PENDING",
     };
 
@@ -146,7 +84,6 @@ export const OrderDetailSheet = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -156,20 +93,10 @@ export const OrderDetailSheet = ({
       if (response.ok) {
         clearCart();
         await fetchOrders();
-        setActiveTab("order");
         setIsSuccessModalOpen(true);
       } else {
         console.error("Backend error:", resData);
-        if (
-          response.status === 401 ||
-          String(resData?.message || "").includes("нэвтэр")
-        ) {
-          alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
-          onClose();
-          router.push("/login");
-        } else {
-          alert(resData?.message || "Захиалга үүсгэхэд алдаа гарлаа.");
-        }
+        alert(resData?.message || "Захиалга үүсгэхэд алдаа гарлаа.");
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -365,103 +292,37 @@ export const OrderDetailSheet = ({
           ) : (
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-white mb-2">
-                Order history
+                Active Orders
               </h3>
               {orders.length === 0 ? (
                 <div className="bg-white rounded-[24px] p-8 text-center text-xs text-zinc-500">
-                  No orders yet.
+                  No active orders yet.
                 </div>
               ) : (
-                <div className="bg-white rounded-[24px] p-5 shadow-sm">
-                  {orders.map((order, index) => {
-                    const status = (order.status || "PENDING").toUpperCase();
-                    const isPending = status === "PENDING";
-                    const isDelivered = status === "DELIVERED";
-                    const isCanceled =
-                      status === "CANCELED" || status === "CANCELLED";
-                    const orderNumber = order._id
-                      ? order._id.slice(-5)
-                      : `${index + 1}`.padStart(5, "0");
-                    const orderDate = order.createdAt
-                      ? new Date(order.createdAt)
-                          .toLocaleDateString("en-CA")
-                          .replace(/-/g, "/")
-                      : "";
+                orders.map((order, index) => (
+                  <div
+                    key={order._id || index}
+                    className="bg-white p-5 rounded-[24px] shadow-sm space-y-3"
+                  >
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <span className="text-xs font-bold text-zinc-900">
+                        {order._id
+                          ? `#${order._id.slice(-6)}`
+                          : `Order #${index + 1}`}
+                      </span>
+                      <span className="text-[10px] bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full font-bold">
+                        {order.status || "PENDING"}
+                      </span>
+                    </div>
 
-                    return (
-                      <div key={order._id || index}>
-                        <div className="space-y-2.5 py-1">
-                          <div className="flex justify-between items-start gap-3">
-                            <h4 className="text-sm font-bold text-zinc-900">
-                              ${(order.totalPrice || 0).toFixed(2)} (#{orderNumber})
-                            </h4>
-                            <span
-                              className={`shrink-0 text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${
-                                isPending
-                                  ? "border border-[#EF4444] text-[#EF4444] bg-transparent"
-                                  : isDelivered
-                                    ? "bg-zinc-100 text-zinc-500"
-                                    : isCanceled
-                                      ? "border border-[#A1A1AA] text-[#A1A1AA] bg-transparent"
-                                      : "bg-zinc-100 text-zinc-500"
-                              }`}
-                            >
-                              {isPending
-                                ? "Pending"
-                                : isDelivered
-                                  ? "Delivered"
-                                  : isCanceled
-                                    ? "Canceled"
-                                    : status.charAt(0) +
-                                      status.slice(1).toLowerCase()}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            {(order.foodOrderItems || []).map((item, i) => (
-                              <div
-                                key={i}
-                                className="flex items-center justify-between gap-2 text-xs text-zinc-600"
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <Soup className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                                  <span className="truncate">
-                                    {item.food?.foodName ||
-                                      item.food?.name ||
-                                      "Food item"}
-                                  </span>
-                                </div>
-                                <span className="shrink-0 text-zinc-500">
-                                  x {item.quantity || 1}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {orderDate && (
-                            <div className="flex items-center gap-2 text-xs text-zinc-500">
-                              <Clock className="w-3.5 h-3.5 shrink-0" />
-                              <span>{orderDate}</span>
-                            </div>
-                          )}
-
-                          {order.address && (
-                            <div className="flex items-start gap-2 text-xs text-zinc-500">
-                              <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                              <span className="line-clamp-2 leading-relaxed">
-                                {order.address}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {index !== orders.length - 1 && (
-                          <hr className="border-dashed border-zinc-200 my-4" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                    <div className="flex justify-between border-t pt-2 text-xs font-bold text-zinc-900">
+                      <span>Total Paid:</span>
+                      <span className="text-[#EF4444]">
+                        ${(order.totalPrice || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           )}

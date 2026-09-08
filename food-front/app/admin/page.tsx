@@ -9,12 +9,8 @@ import {
   Trash2,
   Image as ImageIcon,
   Loader2,
-  ChevronDown,
 } from "lucide-react";
-import {
-  AdminFoodList,
-  EditableFood,
-} from "../_components/adminFoodList";
+import { AdminFoodList } from "../_components/adminFoodList";
 import { AdminOrders } from "../_components/AdminOrders";
 
 export type CategoryType = {
@@ -30,18 +26,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"menu" | "orders">("menu");
-  const [userInitial, setUserInitial] = useState("A");
 
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [allFoodCount, setAllFoodCount] = useState<number>(0);
-  const [foodRefreshKey, setFoodRefreshKey] = useState(0);
 
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [categoryNameInput, setCategoryNameInput] = useState("");
 
   const [isFoodDialogOpen, setIsFoodDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingFoodId, setEditingFoodId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(
     null,
   );
@@ -53,31 +45,12 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const refreshFoodLists = () => {
-    getCategory();
-    setFoodRefreshKey((prev) => prev + 1);
-  };
-
   const resetFoodForm = () => {
     setFoodName("");
     setFoodPrice("");
     setFoodIngredients("");
     setFoodImage("");
-    setSelectedCategory(null);
-    setEditingFoodId(null);
     setIsFoodDialogOpen(false);
-    setIsEditDialogOpen(false);
-  };
-
-  const openEditFoodModal = (food: EditableFood) => {
-    const found = categories.find((c) => c._id === food.categoryId) || null;
-    setEditingFoodId(food.id);
-    setFoodName(food.foodName);
-    setFoodPrice(String(food.price));
-    setFoodIngredients(food.ingredients || "");
-    setFoodImage(food.image || "");
-    setSelectedCategory(found);
-    setIsEditDialogOpen(true);
   };
 
   const getCategory = async () => {
@@ -87,7 +60,7 @@ export default function AdminPage() {
 
       const data = await res.json();
       setCategories(data.categories || []);
-      setAllFoodCount(data.allFoodCount || data.allFoodcount || 0);
+      setAllFoodCount(data.allFoodcount || 0);
     } catch (error) {
       console.error("Fetch error:", error);
     }
@@ -205,7 +178,7 @@ export default function AdminPage() {
 
       if (res.ok) {
         resetFoodForm();
-        refreshFoodLists();
+        getCategory();
       }
     } catch (error) {
       console.error("Create food error:", error);
@@ -214,74 +187,8 @@ export default function AdminPage() {
     }
   };
 
-  const updateFood = async () => {
-    if (!editingFoodId || !foodName || !foodPrice || !selectedCategory) {
-      alert("Шаардлагатай мэдээллийг бүрэн бөглөнө үү!");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/food`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: editingFoodId,
-          foodName,
-          price: Number(foodPrice),
-          ingredients: foodIngredients,
-          image: foodImage,
-          category: selectedCategory._id,
-        }),
-      });
-
-      if (res.ok) {
-        resetFoodForm();
-        refreshFoodLists();
-      }
-    } catch (error) {
-      console.error("Update food error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteEditingFood = async () => {
-    if (!editingFoodId) return;
-    if (!confirm("Энэ хоолыг устгах уу?")) return;
-
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/food`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingFoodId }),
-      });
-
-      if (res.ok) {
-        resetFoodForm();
-        refreshFoodLists();
-      }
-    } catch (error) {
-      console.error("Delete food error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     getCategory();
-
-    try {
-      const raw = localStorage.getItem("user");
-      if (raw) {
-        const user = JSON.parse(raw) as { name?: string; email?: string };
-        const source = user.name?.trim() || user.email?.trim() || "A";
-        setUserInitial(source.charAt(0).toUpperCase());
-      }
-    } catch {
-      setUserInitial("A");
-    }
   }, []);
 
   return (
@@ -329,13 +236,7 @@ export default function AdminPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-10 overflow-y-auto w-full relative">
-        <div className="absolute top-6 right-10">
-          <div className="w-10 h-10 rounded-full bg-[#EF4444] text-white text-sm font-bold flex items-center justify-center shadow-sm">
-            {userInitial}
-          </div>
-        </div>
-
+      <main className="flex-1 p-10 overflow-y-auto w-full">
         {activeTab === "orders" ? (
           <AdminOrders />
         ) : (
@@ -386,13 +287,12 @@ export default function AdminPage() {
               <AdminFoodList
                 key={category._id}
                 category={category}
-                refreshKey={foodRefreshKey}
+                onFoodChange={getCategory}
                 onOpenAddFoodModal={(catId: string) => {
                   const found = categories.find((c) => c._id === catId);
                   setSelectedCategory(found || null);
                   setIsFoodDialogOpen(true);
                 }}
-                onOpenEditFoodModal={openEditFoodModal}
               />
             ))}
           </div>
@@ -554,160 +454,6 @@ export default function AdminPage() {
                 className="px-5 py-2.5 rounded-xl bg-[#18181B] hover:bg-black text-white text-xs font-bold transition disabled:opacity-50"
               >
                 {loading ? "Adding..." : "Add Dish"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Dish Dialog */}
-      {isEditDialogOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[24px] w-full max-w-[480px] p-6 shadow-2xl relative">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-bold text-lg text-gray-900">Dishes info</h3>
-              <button
-                onClick={resetFoodForm}
-                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 mb-6">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Dish name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Type food name"
-                  value={foodName}
-                  onChange={(e) => setFoodName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-black transition"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Dish category
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCategory?._id || ""}
-                    onChange={(e) => {
-                      const found =
-                        categories.find((c) => c._id === e.target.value) ||
-                        null;
-                      setSelectedCategory(found);
-                    }}
-                    className="w-full appearance-none px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-black transition bg-white pr-10"
-                  >
-                    <option value="" disabled>
-                      Select category
-                    </option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>
-                        {cat.categoryName}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Ingredients
-                </label>
-                <textarea
-                  placeholder="List ingredients..."
-                  rows={3}
-                  value={foodIngredients}
-                  onChange={(e) => setFoodIngredients(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-black transition resize-none"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter price..."
-                  value={foodPrice}
-                  onChange={(e) => setFoodPrice(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-black transition"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Image
-                </label>
-                <div className="relative border border-gray-200 bg-gray-50 rounded-2xl h-36 flex flex-col items-center justify-center text-center overflow-hidden">
-                  {uploading ? (
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <Loader2 className="w-5 h-5 animate-spin text-red-500" />
-                      <span className="text-xs font-medium">Uploading...</span>
-                    </div>
-                  ) : foodImage ? (
-                    <div className="relative w-full h-full">
-                      <img
-                        src={foodImage}
-                        alt="Food preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFoodImage("")}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label
-                      htmlFor="edit-food-file-input"
-                      className="flex flex-col items-center justify-center w-full h-full cursor-pointer p-4"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm mb-2 text-gray-600">
-                        <ImageIcon className="w-4 h-4" />
-                      </div>
-                      <p className="text-xs text-gray-500 font-medium">
-                        Click to upload image
-                      </p>
-                      <input
-                        id="edit-food-file-input"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={deleteEditingFood}
-                disabled={loading}
-                className="w-10 h-10 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center transition disabled:opacity-50"
-                aria-label="Delete dish"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={updateFood}
-                disabled={loading || uploading}
-                className="px-5 py-2.5 rounded-xl bg-[#18181B] hover:bg-black text-white text-sm font-bold transition disabled:opacity-50"
-              >
-                {loading ? "Saving..." : "Save changes"}
               </button>
             </div>
           </div>

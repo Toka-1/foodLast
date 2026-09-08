@@ -16,32 +16,21 @@ interface FoodType {
   price: number;
   ingredients: string;
   image: string;
-  category?: string | { _id: string };
+  category?: string | { _id: string }; // Category object эсвэл ID ирж магадгүй
 }
-
-export type EditableFood = {
-  id: string;
-  foodName: string;
-  price: number;
-  ingredients: string;
-  image: string;
-  categoryId?: string;
-};
 
 interface AdminFoodListProps {
   category: CategoryType;
-  refreshKey: number;
+  onFoodChange: () => void;
   onOpenAddFoodModal: (catId: string) => void;
-  onOpenEditFoodModal: (food: EditableFood) => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const AdminFoodList = ({
   category,
-  refreshKey,
+  onFoodChange,
   onOpenAddFoodModal,
-  onOpenEditFoodModal,
 }: AdminFoodListProps) => {
   const [foods, setFoods] = useState<FoodType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,9 +55,9 @@ export const AdminFoodList = ({
         fetchedFoods = data.data;
       }
 
+      // Backend бүх хоолыг шүүлгүй буцааж байвал Front-end дээр Category ID-гаар нь шүүнэ
       const filtered = fetchedFoods.filter((item) => {
-        const foodCatId =
-          typeof item.category === "object" ? item.category?._id : item.category;
+        const foodCatId = typeof item.category === "object" ? item.category?._id : item.category;
         return foodCatId === category._id;
       });
 
@@ -83,7 +72,29 @@ export const AdminFoodList = ({
 
   useEffect(() => {
     getFoods();
-  }, [getFoods, refreshKey]);
+  }, [getFoods]);
+
+  const deleteFood = async (foodId: string) => {
+    // Optimistic UI update
+    setFoods((prev) => prev.filter((item) => item._id !== foodId));
+
+    try {
+      const res = await fetch(`${API_URL}/food`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: foodId }),
+      });
+
+      if (res.ok) {
+        onFoodChange();
+      } else {
+        getFoods();
+      }
+    } catch (error) {
+      console.error("Delete food error:", error);
+      getFoods();
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
@@ -100,25 +111,17 @@ export const AdminFoodList = ({
         {loading ? (
           <p className="text-sm text-gray-400 col-span-2">Уншиж байна...</p>
         ) : foods.length > 0 ? (
-          foods.map((food) => {
-            const foodCatId =
-              typeof food.category === "object"
-                ? food.category?._id
-                : food.category;
-
-            return (
-              <ProductCard
-                key={food._id}
-                id={food._id}
-                foodName={food.foodName}
-                price={food.price}
-                ingredients={food.ingredients}
-                image={food.image}
-                categoryId={foodCatId || category._id}
-                onEdit={onOpenEditFoodModal}
-              />
-            );
-          })
+          foods.map((food) => (
+            <ProductCard
+              key={food._id}
+              id={food._id}
+              foodName={food.foodName}
+              price={food.price}
+              ingredients={food.ingredients}
+              image={food.image}
+              onDelete={deleteFood}
+            />
+          ))
         ) : null}
       </div>
     </div>

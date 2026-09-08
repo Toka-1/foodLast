@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { User, Clock, LogOut, Mail, MapPin, Phone } from "lucide-react";
+import { User, Clock, LogOut, Mail, MapPin, Phone, LayoutDashboard } from "lucide-react";
 
 interface UserProfileModalProps {
   isLoggedIn?: boolean;
@@ -11,6 +11,7 @@ interface UserProfileModalProps {
     phoneNumber?: string;
     address?: string;
     name?: string;
+    role?: string;
   };
   onLogout?: () => void;
 }
@@ -112,6 +113,17 @@ export const UserProfileModal = ({
                   </div>
                 )}
               </div>
+
+              {userData?.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full mb-2 bg-[#18181B] hover:bg-black text-white font-semibold py-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Admin dashboard
+                </Link>
+              )}
 
               <button
                 onClick={() => {

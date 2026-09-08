@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { HeaderDialog } from "./headerDialog";
-import { ShoppingCart } from "lucide-react";
+import { LayoutDashboard, ShoppingCart } from "lucide-react";
 import { CartToast } from "./alertAdded-Cart";
 import { OrderDetailSheet } from "./OrderDetailSheet";
 import { UserProfileModal } from "./UserProfileDropdown";
@@ -73,6 +73,15 @@ export const Header = () => {
         <CartToast />
 
         <div className="flex flex-row gap-2.5 items-center">
+          {userData?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="flex h-9 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-semibold text-black transition-colors hover:bg-gray-100"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Admin
+            </Link>
+          )}
           <HeaderDialog />
           <button
             onClick={() => setIsCartOpen(true)}
