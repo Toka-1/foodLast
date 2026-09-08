@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ProductCard } from "./ProductCard";
 import { AddDishCard } from "./AddDishCard";
-import { EditDishDialog, EditableDish } from "./EditDishDialog";
 
 interface CategoryType {
   _id: string;
@@ -22,7 +21,6 @@ interface FoodType {
 
 interface AdminFoodListProps {
   category: CategoryType;
-  categories?: CategoryType[];
   onFoodChange: () => void;
   onOpenAddFoodModal: (catId: string) => void;
 }
@@ -31,13 +29,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const AdminFoodList = ({
   category,
-  categories = [],
   onFoodChange,
   onOpenAddFoodModal,
 }: AdminFoodListProps) => {
   const [foods, setFoods] = useState<FoodType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [editing, setEditing] = useState<EditableDish | null>(null);
 
   const getFoods = useCallback(async () => {
     if (!category?._id) return;
@@ -124,28 +120,15 @@ export const AdminFoodList = ({
               ingredients={food.ingredients}
               image={food.image}
               categoryId={
-                (typeof food.category === "object"
+                typeof food.category === "object"
                   ? food.category?._id
-                  : food.category) || category._id
+                  : food.category
               }
-              onEdit={(item) => setEditing(item)}
               onDelete={deleteFood}
             />
           ))
         ) : null}
       </div>
-
-      {editing && (
-        <EditDishDialog
-          food={editing}
-          categories={categories}
-          onClose={() => setEditing(null)}
-          onSaved={() => {
-            getFoods();
-            onFoodChange();
-          }}
-        />
-      )}
     </div>
   );
 };

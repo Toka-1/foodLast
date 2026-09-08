@@ -51,7 +51,7 @@ export const ProductCard = ({
             <button
               type="button"
               onClick={() => onDelete(id)}
-              className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 transition shadow-md"
+              className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 transition shadow-md"
               aria-label="Delete dish"
             >
               <Trash2 className="w-4 h-4" />
@@ -70,7 +70,7 @@ export const ProductCard = ({
                   categoryId,
                 })
               }
-              className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[#EF4444] hover:bg-red-50 transition shadow-md"
+              className="w-9 h-9 bg-[#EF4444] rounded-full flex items-center justify-center text-white hover:bg-red-600 transition shadow-md"
               aria-label="Edit dish"
             >
               <Pencil className="w-4 h-4" />

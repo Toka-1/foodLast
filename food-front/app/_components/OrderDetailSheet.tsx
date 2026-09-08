@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, Edit2, Check } from "lucide-react";
 import { useCart } from "./context/CartContext";
+import { API_URL } from "@/lib/api";
 
 interface OrderItem {
   _id?: string;
@@ -14,7 +15,7 @@ interface OrderItem {
   address?: string;
 }
 
-const API_BASE_URL = "http://localhost:8000/order";
+const API_BASE_URL = `${API_URL}/order`;
 
 export const OrderDetailSheet = ({
   isOpen,

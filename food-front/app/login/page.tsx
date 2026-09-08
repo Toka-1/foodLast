@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { API_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function LoginPage() {
     setErrorMessage(""); // Шинээр илгээхээс өмнө хуучин алдааг цэвэрлэнэ
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/login`, {
+      const res = await fetch(`${API_URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

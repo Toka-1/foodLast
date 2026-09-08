@@ -4,6 +4,7 @@ import { Header } from "./_components/header";
 import { MenuContainer } from "./_components/menuContainer";
 import { Footer } from "./_components/footer";
 import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
 
 export type CardItem = {
   _id?: string;
@@ -29,7 +30,7 @@ export default function Home() {
   const fetchData = async () => {
     try {
       // 1. Категори татах
-      const catRes = await fetch("http://localhost:8000/category");
+      const catRes = await fetch(`${API_URL}/category`);
       const catData = await catRes.json();
       const loadedCategories = Array.isArray(catData) ? catData : catData.categories || [];
       
@@ -38,7 +39,7 @@ export default function Home() {
       setCategories(loadedCategories);
 
     
-      const foodRes = await fetch("http://localhost:8000/food");
+      const foodRes = await fetch(`${API_URL}/food`);
       const foodData = await foodRes.json();
       const loadedFoods = Array.isArray(foodData) ? foodData : foodData.foods || [];
 
