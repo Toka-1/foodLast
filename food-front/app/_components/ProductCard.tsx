@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 type ProductCardProps = {
   id: string;
@@ -9,7 +9,7 @@ type ProductCardProps = {
   ingredients: string;
   image: string;
   categoryId?: string;
-  onEdit: (food: {
+  onEdit?: (food: {
     id: string;
     foodName: string;
     price: number;
@@ -17,6 +17,7 @@ type ProductCardProps = {
     image: string;
     categoryId?: string;
   }) => void;
+  onDelete?: (foodId: string) => void | Promise<void>;
 };
 
 export const ProductCard = ({
@@ -27,6 +28,7 @@ export const ProductCard = ({
   image,
   categoryId,
   onEdit,
+  onDelete,
 }: ProductCardProps) => {
   return (
     <div className="relative w-full bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition">
@@ -44,23 +46,37 @@ export const ProductCard = ({
           }}
         />
 
-        <button
-          type="button"
-          onClick={() =>
-            onEdit({
-              id,
-              foodName,
-              price,
-              ingredients,
-              image,
-              categoryId,
-            })
-          }
-          className="absolute bottom-3 right-3 z-10 w-9 h-9 bg-[#EF4444] rounded-full flex items-center justify-center text-white hover:bg-red-600 transition shadow-md"
-          aria-label="Edit dish"
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(id)}
+              className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 transition shadow-md"
+              aria-label="Delete dish"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() =>
+                onEdit({
+                  id,
+                  foodName,
+                  price,
+                  ingredients,
+                  image,
+                  categoryId,
+                })
+              }
+              className="w-9 h-9 bg-[#EF4444] rounded-full flex items-center justify-center text-white hover:bg-red-600 transition shadow-md"
+              aria-label="Edit dish"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1 px-1 pb-1">

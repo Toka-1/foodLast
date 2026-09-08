@@ -119,6 +119,11 @@ export const AdminFoodList = ({
               price={food.price}
               ingredients={food.ingredients}
               image={food.image}
+              categoryId={
+                typeof food.category === "object"
+                  ? food.category?._id
+                  : food.category
+              }
               onDelete={deleteFood}
             />
           ))
