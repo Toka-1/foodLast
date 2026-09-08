@@ -239,14 +239,23 @@ export const EditDishDialog = ({
           >
             <Trash2 className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={saveChanges}
-            disabled={saving || uploading}
-            className="rounded-xl bg-[#18181B] px-5 py-2.5 text-xs font-bold text-white hover:bg-black disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save changes"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={saveChanges}
+              disabled={saving || uploading}
+              className="rounded-xl bg-[#18181B] px-5 py-2.5 text-xs font-bold text-white hover:bg-black disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save changes"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

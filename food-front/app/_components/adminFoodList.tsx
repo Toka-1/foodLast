@@ -22,7 +22,7 @@ interface FoodType {
 
 interface AdminFoodListProps {
   category: CategoryType;
-  categories: CategoryType[];
+  categories?: CategoryType[];
   onFoodChange: () => void;
   onOpenAddFoodModal: (catId: string) => void;
 }
@@ -31,7 +31,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const AdminFoodList = ({
   category,
-  categories,
+  categories = [],
   onFoodChange,
   onOpenAddFoodModal,
 }: AdminFoodListProps) => {
@@ -78,6 +78,28 @@ export const AdminFoodList = ({
     getFoods();
   }, [getFoods]);
 
+  const deleteFood = async (foodId: string) => {
+    // Optimistic UI update
+    setFoods((prev) => prev.filter((item) => item._id !== foodId));
+
+    try {
+      const res = await fetch(`${API_URL}/food`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: foodId }),
+      });
+
+      if (res.ok) {
+        onFoodChange();
+      } else {
+        getFoods();
+      }
+    } catch (error) {
+      console.error("Delete food error:", error);
+      getFoods();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
       <h2 className="text-base font-bold text-gray-900">
@@ -102,20 +124,12 @@ export const AdminFoodList = ({
               ingredients={food.ingredients}
               image={food.image}
               categoryId={
-                typeof food.category === "object"
+                (typeof food.category === "object"
                   ? food.category?._id
-                  : food.category
+                  : food.category) || category._id
               }
-              onEdit={(item) =>
-                setEditing({
-                  id: item.id,
-                  foodName: item.foodName,
-                  price: item.price,
-                  ingredients: item.ingredients,
-                  image: item.image,
-                  categoryId: item.categoryId,
-                })
-              }
+              onEdit={(item) => setEditing(item)}
+              onDelete={deleteFood}
             />
           ))
         ) : null}
