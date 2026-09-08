@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { OrderFoodsPopover } from "./OrderFoodsPopover";
 
 interface OrderItem {
   _id: string;
@@ -123,10 +124,7 @@ export function AdminOrders() {
                       {order.user?.email || "Test@gmail.com"}
                     </td>
                     <td className="py-4">
-                      <div className="flex items-center gap-1.5 font-medium">
-                        <span>{order.foodOrderItems?.length || 2} foods</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                      </div>
+                      <OrderFoodsPopover items={order.foodOrderItems} />
                     </td>
                     <td className="py-4 text-gray-500">
                       {order.createdAt

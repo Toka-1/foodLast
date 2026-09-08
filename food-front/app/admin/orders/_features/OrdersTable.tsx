@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
+import { OrderFoodsPopover } from "@/app/_components/OrderFoodsPopover";
 
 type Status = "Pending" | "Delivered" | "Canceled";
 type OrderStatus = "PENDING" | "DELIVERED" | "CANCELED";
@@ -229,10 +230,7 @@ export const OrdersTable = ({
                     {customerLabel(order)}
                   </td>
                   <td className="px-2 py-3">
-                    <div className="flex items-center gap-1 text-[#71717A]">
-                      {order.foodOrderItems?.length || 0} foods{" "}
-                      <ChevronDown className="w-3 h-3" />
-                    </div>
+                    <OrderFoodsPopover items={order.foodOrderItems} />
                   </td>
                   <td className="px-2 py-3 text-[#71717A]">
                     {order.createdAt

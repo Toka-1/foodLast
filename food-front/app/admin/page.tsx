@@ -287,6 +287,7 @@ export default function AdminPage() {
               <AdminFoodList
                 key={category._id}
                 category={category}
+                categories={categories}
                 onFoodChange={getCategory}
                 onOpenAddFoodModal={(catId: string) => {
                   const found = categories.find((c) => c._id === catId);

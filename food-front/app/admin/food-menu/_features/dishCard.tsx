@@ -6,10 +6,16 @@ export type FoodType = {
   price: number;
   image: string;
   ingredients: string;
-  category: string;
+  category: string | { _id: string };
 };
 
-export const DishCard = ({ food }: { food: FoodType }) => {
+export const DishCard = ({
+  food,
+  onEdit,
+}: {
+  food: FoodType;
+  onEdit: (food: FoodType) => void;
+}) => {
   return (
     <div className="rounded-xl overflow-hidden border border-[#F4F4F5]">
       <div className="relative h-[180px]">
@@ -19,8 +25,13 @@ export const DishCard = ({ food }: { food: FoodType }) => {
           className="w-full h-full object-cover"
         />
 
-        <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center">
-          <Pencil className="w-3.5 h-3.5 text-black" />
+        <button
+          type="button"
+          onClick={() => onEdit(food)}
+          className="absolute bottom-3 right-3 w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-md hover:bg-red-50 transition"
+          aria-label="Edit dish"
+        >
+          <Pencil className="w-4 h-4 text-[#EF4444]" />
         </button>
       </div>
 

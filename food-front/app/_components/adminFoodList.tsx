@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ProductCard } from "./ProductCard";
 import { AddDishCard } from "./AddDishCard";
+import { EditDishDialog, EditableDish } from "./EditDishDialog";
 
 interface CategoryType {
   _id: string;
@@ -21,6 +22,7 @@ interface FoodType {
 
 interface AdminFoodListProps {
   category: CategoryType;
+  categories: CategoryType[];
   onFoodChange: () => void;
   onOpenAddFoodModal: (catId: string) => void;
 }
@@ -29,11 +31,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const AdminFoodList = ({
   category,
+  categories,
   onFoodChange,
   onOpenAddFoodModal,
 }: AdminFoodListProps) => {
   const [foods, setFoods] = useState<FoodType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [editing, setEditing] = useState<EditableDish | null>(null);
 
   const getFoods = useCallback(async () => {
     if (!category?._id) return;
@@ -74,28 +78,6 @@ export const AdminFoodList = ({
     getFoods();
   }, [getFoods]);
 
-  const deleteFood = async (foodId: string) => {
-    // Optimistic UI update
-    setFoods((prev) => prev.filter((item) => item._id !== foodId));
-
-    try {
-      const res = await fetch(`${API_URL}/food`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: foodId }),
-      });
-
-      if (res.ok) {
-        onFoodChange();
-      } else {
-        getFoods();
-      }
-    } catch (error) {
-      console.error("Delete food error:", error);
-      getFoods();
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
       <h2 className="text-base font-bold text-gray-900">
@@ -124,11 +106,32 @@ export const AdminFoodList = ({
                   ? food.category?._id
                   : food.category
               }
-              onDelete={deleteFood}
+              onEdit={(item) =>
+                setEditing({
+                  id: item.id,
+                  foodName: item.foodName,
+                  price: item.price,
+                  ingredients: item.ingredients,
+                  image: item.image,
+                  categoryId: item.categoryId,
+                })
+              }
             />
           ))
         ) : null}
       </div>
+
+      {editing && (
+        <EditDishDialog
+          food={editing}
+          categories={categories}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            getFoods();
+            onFoodChange();
+          }}
+        />
+      )}
     </div>
   );
 };
