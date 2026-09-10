@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ProductCard } from "./ProductCard";
 import { AddDishCard } from "./AddDishCard";
 import { EditDishDialog, EditableDish } from "./EditDishDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CategoryType {
   _id: string;
@@ -61,7 +62,10 @@ export const AdminFoodList = ({
 
       // Backend бүх хоолыг шүүлгүй буцааж байвал Front-end дээр Category ID-гаар нь шүүнэ
       const filtered = fetchedFoods.filter((item) => {
-        const foodCatId = typeof item.category === "object" ? item.category?._id : item.category;
+        const foodCatId =
+          typeof item.category === "object"
+            ? item.category?._id
+            : item.category;
         return foodCatId === category._id;
       });
 

@@ -5,6 +5,7 @@ import { MenuContainer } from "./_components/menuContainer";
 import { Footer } from "./_components/footer";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type CardItem = {
   _id?: string;
@@ -91,7 +92,31 @@ export default function Home() {
 
         <div className="p-22">
           {loading ? (
-            <p className="text-white text-center py-10">Уншиж байна...</p>
+            <div className="flex flex-col gap-10">
+              {Array.from({ length: 2 }).map((_, section) => (
+                <div key={section}>
+                  <Skeleton className="mb-4 h-8 w-48 bg-white/25" />
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-85.5 w-99.25 rounded-lg bg-white p-4"
+                      >
+                        <Skeleton className="h-52.5 w-full rounded-lg" />
+                        <div className="flex flex-col gap-2 p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <Skeleton className="h-6 w-36" />
+                            <Skeleton className="h-6 w-16" />
+                          </div>
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-3/4" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : categories.length === 0 ? (
             <p className="text-white text-center py-10">
               Категори олдсонгүй. Консол цонхоо шалгана уу.
